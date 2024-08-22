@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
+/* @layer base {
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
@@ -57,11 +57,81 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+} */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+
+    --primary-1: 214.3 82.1% 54.3%; /* #2F80ED */
+    --primary-2: 0 0% 31.1%; /* #4F4F4F */
+    --primary-3: 0 0% 51.2%; /* #828282 */
+    --primary-4: 0 0% 87.8%; /* #E0E0E0 */
+
+    --indicator-1: 26.5 91.1% 70.2%; /* #F8B76B */
+    --indicator-2: 243.5 100% 75.3%; /* #8785FF */
+    --indicator-3: 0 84.2% 60.2%; /* #EB5757 */
+    --indicator-4: 48.8 89.2% 67.8%; /* #F2C94C */
+
+    --chat-1: 36.2 92.3% 89.8%; /* #FCEED3 */
+    --chat-2: 34.1 70.9% 58.6%; /* #E5A443 */
+    --chat-3: 270 100% 93.9%; /* #EEDCFF */
+    --chat-4: 281.2 60.5% 58.6%; /* #9B51E0 */
+    --chat-5: 163.1 63.3% 88.2%; /* #D2F2EA */
+    --chat-6: 161.7 48.6% 49.8%; /* #43B78D */
+
+    --sticker-1: 207.3 100% 95.5%; /* #E9F3FF */
+    --sticker-2: 32.9 96.8% 82.7%; /* #FDCFA4 */
+    --sticker-3: 37.6 86.4% 89.6%; /* #F9E9C3 */
+    --sticker-4: 156.4 66.1% 84.1%; /* #AFEBDB */
+    --sticker-5: 123.5 76.6% 87.1%; /* #CBF1C2 */
+    --sticker-6: 252.6 84.4% 94.1%; /* #CFCEF9 */
+    --sticker-7: 293.1 84.7% 92.5%; /* #F9E0FD */
+  }
+
+  .dark {
+    --background: 0 0% 20%; /* #333333 */
+    --foreground: 0 0% 95%; /* #F2F2F2 */
+    --border-1: 0 0% 95%; /* #F2F2F2 */
+    --border-2: 0, 0%, 74%; /* #BDBDBD */
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+
+    --primary-1: 214.3 82.1% 54.3%;
+    --primary-2: 0 0% 31.1%;
+    --primary-3: 0 0% 51.2%;
+    --primary-4: 0 0% 87.8%;
+
+    --indicator-1: 26.5 91.1% 70.2%;
+    --indicator-2: 243.5 100% 75.3%;
+    --indicator-3: 0 84.2% 60.2%;
+    --indicator-4: 48.8 89.2% 67.8%;
+
+    --chat-1: 36.2 92.3% 89.8%;
+    --chat-2: 34.1 70.9% 58.6%;
+    --chat-3: 270 100% 93.9%;
+    --chat-4: 281.2 60.5% 58.6%;
+    --chat-5: 163.1 63.3% 88.2%;
+    --chat-6: 161.7 48.6% 49.8%;
+
+    --sticker-1: 207.3 100% 95.5%;
+    --sticker-2: 32.9 96.8% 82.7%;
+    --sticker-3: 37.6 86.4% 89.6%;
+    --sticker-4: 156.4 66.1% 84.1%;
+    --sticker-5: 123.5 76.6% 87.1%;
+    --sticker-6: 252.6 84.4% 94.1%;
+    --sticker-7: 293.1 84.7% 92.5%;
+  }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border-gray-100;
   }
   body {
     @apply bg-background text-foreground;
