@@ -13,8 +13,21 @@
   font-style: normal;
 }
 
+/* general */
 body {
   font-family: "Lato", sans-serif;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply rounded bg-border-gray-200;
 }
 
 /* menu */
@@ -72,14 +85,40 @@ body {
 
 /* chat */
 
-#chat-container::-webkit-scrollbar {
-  width: 8px;
+/* to do */
+/* .date-input-container {
+  align-items: end;
+  justify-content: end;
+  transform: translateX(500%);
 }
 
-#chat-container::-webkit-scrollbar-track {
-  margin-right: -1rem;
+.date-input {
+  position: absolute;
+  right: 0;
 }
 
-#chat-container::-webkit-scrollbar-thumb {
-  @apply rounded bg-border-gray-200;
+.date-input::-webkit-datetime-edit {
+  background-color: aquamarine;
 }
+
+.date-input::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 0;
+  background-color: violet;
+}
+
+.date-input::-webkit-datetime-edit-fields-wrapper {
+  background-color: bisque;
+}
+
+.date-input::-webkit-inner-spin-button {
+  background-color: yellow;
+} */
+/* .date-input::before {
+  content: "Set Date";
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  @apply text-primary-gray-300;
+} */

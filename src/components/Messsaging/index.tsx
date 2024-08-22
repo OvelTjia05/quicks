@@ -1,6 +1,7 @@
 import { PersonIcon, SearchIcon } from "@/assets/icons";
 import Chat from "./Chat";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Loader from "../ui/loader";
 
 type ChatItem = {
   id: string;
@@ -64,65 +65,86 @@ const CHATLIST: ChatItem[] = [
 ];
 const Messaging = () => {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const searchResult = CHATLIST.filter((item) =>
+    item.type === "group"
+      ? item.groupName?.toLowerCase().includes(search.toLowerCase())
+      : item.name?.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  useEffect(() => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+  }, []);
 
   return (
     <>
-      {!selectedChat ? (
+      {isLoading ? (
+        <Loader label="Loading Chats..." />
+      ) : !selectedChat ? (
         <>
           <div className="flex items-center gap-2 rounded-[5px] border border-primary-gray-200 px-[10%] py-1">
             <input
               type="text"
               placeholder="Search"
+              value={search}
               className="flex-1 outline-none"
+              onChange={(e) => setSearch(e.target.value)}
             />
             <SearchIcon className="h-3 w-3 fill-background" />
           </div>
-          {CHATLIST.map((item, index) => (
-            <div
-              key={index}
-              className={`relative flex gap-4 py-[22px] text-primary-gray-300 ${
-                index !== CHATLIST.length - 1 &&
-                "border-b border-b-primary-gray-200"
-              }`}
-              onClick={() => setSelectedChat(item.id)}
-            >
-              {item.latestMessage.status === "unread" && (
-                <div className="absolute right-0 h-[10px] w-[10px] self-center rounded-full bg-indicator-red"></div>
-              )}
-              {item.type === "group" ? (
-                <div className="relative inline-flex h-fit shrink items-center justify-center">
-                  <div className="left-1/4 inline-flex h-[34px] w-[34px] items-center justify-center rounded-full bg-primary-gray-100 p-2">
-                    <PersonIcon className="h-full w-full fill-primary-gray-300" />
+          <div className="scrollbar-hidden h-full overflow-clip overflow-y-scroll">
+            {searchResult.map((item, index) => (
+              <div
+                key={index}
+                className={`relative flex gap-4 py-[22px] text-primary-gray-300 ${
+                  index !== CHATLIST.length - 1 &&
+                  "border-b border-b-primary-gray-200"
+                }`}
+                onClick={() => setSelectedChat(item.id)}
+              >
+                {item.latestMessage.status === "unread" && (
+                  <div className="absolute right-0 h-[10px] w-[10px] self-center rounded-full bg-indicator-red"></div>
+                )}
+                {item.type === "group" ? (
+                  <div className="relative inline-flex h-fit shrink items-center justify-center">
+                    <div className="left-1/4 inline-flex h-[34px] w-[34px] items-center justify-center rounded-full bg-primary-gray-100 p-2">
+                      <PersonIcon className="h-full w-full fill-primary-gray-300" />
+                    </div>
+                    <div className="right-1/4 -ml-[17px] inline-flex h-[34px] min-w-[34px] items-center justify-center rounded-full bg-primary-blue p-2">
+                      <PersonIcon className="h-full w-full" />
+                    </div>
                   </div>
-                  <div className="right-1/4 -ml-[17px] inline-flex h-[34px] min-w-[34px] items-center justify-center rounded-full bg-primary-blue p-2">
-                    <PersonIcon className="h-full w-full" />
+                ) : (
+                  <div className="flex w-[51px] justify-center">
+                    <div className="relative inline-flex h-[34px] min-w-[34px] items-center justify-center rounded-full bg-primary-blue p-2 text-white">
+                      {item.name?.slice(0, 1).toUpperCase()}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex w-[51px] justify-center">
-                  <div className="relative inline-flex h-[34px] min-w-[34px] items-center justify-center rounded-full bg-primary-blue p-2 text-white">
-                    {item.name?.slice(0, 1).toUpperCase()}
+                )}
+                <div className="flex flex-col">
+                  <div className="mb-1 flex gap-x-4 leading-none">
+                    <p className="font-bold text-primary-blue">
+                      {item.type === "group" ? item.groupName : item.name}
+                    </p>
+                    <p className="min-w-fit">{item.latestMessage.date}</p>
                   </div>
-                </div>
-              )}
-              <div className="flex flex-col">
-                <div className="mb-1 flex gap-x-4 leading-none">
-                  <p className="font-bold text-primary-blue">
-                    {item.type === "group" ? item.groupName : item.name}
+                  <p className="text-sm font-bold">
+                    {item.type === "group" && item.latestMessage.name}
                   </p>
-                  <p className="min-w-fit">{item.latestMessage.date}</p>
+                  <p className="text-sm">
+                    {item.type === "group"
+                      ? item.latestMessage.message
+                      : item.latestMessage.message}
+                  </p>
                 </div>
-                <p className="text-sm font-bold">
-                  {item.type === "group" && item.latestMessage.name}
-                </p>
-                <p className="text-sm">
-                  {item.type === "group"
-                    ? item.latestMessage.message
-                    : item.latestMessage.message}
-                </p>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </>
       ) : (
         <Chat

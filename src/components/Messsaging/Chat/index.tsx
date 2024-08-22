@@ -1,8 +1,12 @@
 import { ArrowLeftIcon, EllipsisIcon, XIcon } from "@/assets/icons";
 import Badge from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useEffect } from "react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useEffect, useRef, useState } from "react";
 
 const CHATGROUP = {
   id: "1",
@@ -24,7 +28,7 @@ const CHATGROUP = {
       name: "Cammeron Phillips",
       message:
         "I understand your initial concerns and thats very valid, Elizabeth. But you ...",
-      date: "01/06/2020 12:19",
+      date: "01/06/2021 12:21",
       status: "read",
     },
     {
@@ -99,7 +103,7 @@ const CHATPERSON = {
       name: "Cammeron Phillips",
       message:
         "I understand your initial concerns and thats very valid, Elizabeth. But you ...",
-      date: "01/06/2020 12:19",
+      date: "01/06/2021 12:21",
       status: "read",
     },
     {
@@ -157,28 +161,105 @@ const CHATPERSON = {
 const MY_ID = "1";
 
 const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
-  const sortedMessages = CHATGROUP.messages.sort(
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [chatData, setChatData] = useState(
+    id === CHATGROUP.id ? CHATGROUP : CHATPERSON,
+  );
+  const [editing, setEditing] = useState<{
+    message: string;
+    idMessage: string;
+  } | null>(null);
+  const [message, setMessage] = useState("");
+
+  chatData.messages.sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
   );
 
   const scrollToBottom = () => {
-    const chat = document.getElementById("chat");
+    const chat = document.getElementById("chat-container");
     chat?.scrollTo({
       top: chat.scrollHeight,
       behavior: "auto",
     });
   };
 
+  const autoExpandTextareaHeight = () => {
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+      console.log("yaho");
+      inputRef.current.style.height = inputRef.current.scrollHeight + "px";
+    }
+  };
+
+  useEffect(() => {
+    if (editing) {
+      setMessage(editing.message);
+    }
+    if (inputRef.current) {
+      inputRef.current.focus();
+      autoExpandTextareaHeight();
+    }
+  }, [editing]);
+
+  useEffect(() => {
+    autoExpandTextareaHeight();
+  }, [message]);
+
   useEffect(() => {
     scrollToBottom();
-  }, [sortedMessages]);
+  }, [chatData]);
+
+  const handleSend = () => {
+    if (message.trim() !== "") {
+      if (editing) {
+        setChatData((prevData) => ({
+          ...prevData,
+          messages: prevData.messages.map((msg) => {
+            if (msg.idMessage === editing.idMessage) {
+              return {
+                ...msg,
+                message: message,
+              };
+            }
+            return msg;
+          }),
+        }));
+        setEditing(null);
+      } else {
+        const newMessage = {
+          idMessage: (chatData.messages.length + 1).toString(),
+          idUser: MY_ID,
+          name: "ovel",
+          message: message,
+          date: new Date().toLocaleString(),
+          status: "read",
+        };
+
+        setChatData((prevData) => ({
+          ...prevData,
+          messages: [...prevData.messages, newMessage],
+        }));
+      }
+      setMessage("");
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    setChatData((prevData) => ({
+      ...prevData,
+      messages: prevData.messages.filter((message) => message.idMessage !== id),
+    }));
+  };
 
   const assignColor = (id: string) => {
     const arr = [
-      ...new Set([MY_ID, ...sortedMessages.map((item) => item.idUser)]),
+      ...new Set([MY_ID, ...chatData.messages.map((item) => item.idUser)]),
     ];
-    console.log("hhh", arr);
-
+    if (chatData.type === "person") {
+      return id === MY_ID
+        ? { color: "text-chats-lavender-200", bg: "bg-chats-lavender-100" }
+        : { color: "text-primary-blue", bg: "bg-[#F8F8F8]" };
+    }
     return id === MY_ID
       ? { color: "text-chats-lavender-200", bg: "bg-chats-lavender-100" }
       : arr.indexOf(id) % 2 === 0
@@ -215,9 +296,9 @@ const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
       <div className="flex h-full">
         <div
           id="chat-container"
-          className="relative mb-[60px] mt-14 flex flex-1 flex-col gap-2 overflow-y-auto pr-1 text-primary-gray-300"
+          className="custom-scrollbar relative mb-[60px] mt-14 flex flex-1 flex-col gap-2 overflow-y-auto pr-1 text-primary-gray-300"
         >
-          {sortedMessages.map((item, index) => (
+          {chatData.messages.map((item, index) => (
             <div key={item.idMessage}>
               <div
                 className={`max-w-[80%] ${item.idUser === MY_ID ? "ml-auto" : ""}`}
@@ -244,12 +325,36 @@ const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
                       })}
                     </small>
                   </div>
-                  <EllipsisIcon className="h-4 w-4 fill-background" />
+                  <Popover>
+                    <PopoverTrigger className="h-fit py-1">
+                      <EllipsisIcon className="fill-primary-gray-300" />
+                    </PopoverTrigger>
+                    <PopoverContent
+                      side="bottom"
+                      align={MY_ID !== item.idUser ? "start" : "end"}
+                    >
+                      <div className="flex min-w-[120px] flex-col [&>p]:w-full [&>p]:px-3 [&>p]:py-2">
+                        {item.idUser === MY_ID && (
+                          <p
+                            className="border-b border-primary-gray-300 text-primary-blue"
+                            onClick={() => setEditing(item)}
+                          >
+                            Edit
+                          </p>
+                        )}
+                        <p onClick={() => handleDelete(item.idMessage)}>
+                          Delete
+                        </p>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 
               {index ===
-                sortedMessages.findIndex((item) => item.status === "unread") -
+                chatData.messages.findIndex(
+                  (item) => item.status === "unread",
+                ) -
                   1 && (
                 <div className="mt-4 flex items-center justify-center gap-x-6">
                   <div className="flex flex-1 border border-indicator-red"></div>
@@ -258,7 +363,7 @@ const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
                 </div>
               )}
               {index ===
-                sortedMessages.findIndex(
+                chatData.messages.findIndex(
                   (item) =>
                     new Date(item.date).toDateString() ===
                     new Date().toDateString(),
@@ -280,15 +385,23 @@ const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
             </div>
           ))}
         </div>
-        {sortedMessages.some((item) => item.status === "unread") && (
+        {chatData.messages.some((item) => item.status === "unread") && (
           <div className="absolute bottom-20 left-1/2 inline-flex -translate-x-1/2 transform">
             <Badge label={"New Message"} />
           </div>
         )}
       </div>
       <div className="sticky bottom-0 flex gap-3 bg-white">
-        <Input placeholder="Type a new message" />
-        <Button>Send</Button>
+        <textarea
+          rows={1}
+          maxLength={1000}
+          ref={inputRef}
+          value={message}
+          placeholder="Type a new message"
+          className="scrollbar-hidden flex max-h-24 flex-1 resize-none rounded-[5px] border border-primary-gray-200 px-3 py-2 text-background ring-primary-gray-200 focus:outline-none focus:ring-1"
+          onChange={(e) => setMessage(e.target.value)}
+        />
+        <Button onClick={handleSend}>Send</Button>
       </div>
     </>
   );
