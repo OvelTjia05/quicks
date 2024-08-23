@@ -16,7 +16,7 @@
 @font-face {
   font-family: "Hiragino Kaku Gothic StdN";
   src: url("/src/assets/fonts/Hiragino-Kaku-Gothic-StdN-W8.otf")
-    format("truetype");
+    format("opentype");
   font-weight: 900;
   font-style: normal;
 }
