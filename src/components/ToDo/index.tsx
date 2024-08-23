@@ -23,50 +23,95 @@ import { ClockIcon, EllipsisIcon, PencilIcon } from "@/assets/icons";
 import { Checkbox } from "../ui/checkbox";
 import { useEffect, useRef, useState } from "react";
 import Loader from "../ui/loader";
+import axios from "axios";
 
-const toDoList = [
-  {
-    id: "1",
-    title: "Close off Case #012920- RODRIGUES, Amiguel",
-    dueDate: "2024-08-24",
-    description:
-      "Closing off this case since this application has been cancelled. No one really understand how this case could possibly be cancelled. The options and the documents within this document were totally a guaranteed for a success!",
-    status: "finished",
-  },
-  {
-    id: "2",
-    title: "Close off Case #012920- RODRIGUES, Amiguel",
-    dueDate: "2024-08-23",
-    description:
-      "Closing off this case since this application has been cancelled. No one really understand how this case could possibly be cancelled. The options and the documents within this document were totally a guaranteed for a success!",
-    status: "unfinished",
-  },
-  {
-    id: "3",
-    title:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci magni voluptatum dolores atque vero quas doloremque placeat aliquid reprehenderit in? Facere.",
-    dueDate: "2024-08-25",
-    description:
-      "Closing off this case since this application has been cancelled. No one really understand how this case could possibly be cancelled. The options and the documents within this document were totally a guaranteed for a success!",
-    status: "finished",
-  },
-];
+// const toDoList = [
+//   {
+//     id: "1",
+//     title: "Close off Case #012920- RODRIGUES, Amiguel",
+//     dueDate: "2024-08-24",
+//     description:
+//       "Closing off this case since this application has been cancelled. No one really understand how this case could possibly be cancelled. The options and the documents within this document were totally a guaranteed for a success!",
+//     status: "finished",
+//   },
+//   {
+//     id: "2",
+//     title: "Close off Case #012920- RODRIGUES, Amiguel",
+//     dueDate: "2024-08-23",
+//     description:
+//       "Closing off this case since this application has been cancelled. No one really understand how this case could possibly be cancelled. The options and the documents within this document were totally a guaranteed for a success!",
+//     status: "unfinished",
+//   },
+//   {
+//     id: "3",
+//     title:
+//       "Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci magni voluptatum dolores atque vero quas doloremque placeat aliquid reprehenderit in? Facere.",
+//     dueDate: "2024-08-25",
+//     description:
+//       "Closing off this case since this application has been cancelled. No one really understand how this case could possibly be cancelled. The options and the documents within this document were totally a guaranteed for a success!",
+//     status: "finished",
+//   },
+// ];
 
+type ToDo = {
+  id: string;
+  title: string;
+  dueDate: string;
+  description: string;
+  completed: boolean;
+};
+
+const MY_ID = "1";
 const ToDo = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const titleRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   const [taskId, setTaskId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
-  const [task, setTask] = useState(toDoList);
+  const [task, setTask] = useState<ToDo[]>([]);
+
+  const getData = async () => {
+    try {
+      setIsLoading(true);
+      const res = await axios.get(
+        `https://jsonplaceholder.typicode.com/todos?userId=${MY_ID}`,
+      );
+      console.log("res", res);
+      const { data, status } = res;
+      if (status === 200) {
+        const modifiedData = data.map((item: ToDo, index: number) => ({
+          id: item.id.toString(),
+          title: item.title,
+          dueDate: new Date(Date.now() + 86400000 * (index + 1))
+            .toISOString()
+            .split("T")[0],
+          description:
+            "lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci magni voluptatum dolores atque vero quas doloremque placeat aliquid reprehenderit in? Facere.",
+          completed: false,
+        }));
+        setTask(modifiedData);
+      }
+      setIsLoading(false);
+    } catch (error) {
+      /* make an alert */
+      console.log("error", error);
+      alert("Error fetching data");
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
+    getData();
   }, []);
+
+  // useEffect(() => {
+  //   setIsLoading(true);
+  //   setTimeout(() => {
+  //     setIsLoading(false);
+  //   }, 2000);
+  // }, []);
 
   useEffect(() => {
     if (editing && inputRef.current) {
@@ -76,12 +121,18 @@ const ToDo = () => {
     }
   }, [editing]);
 
+  useEffect(() => {
+    if (!editing && titleRef.current) {
+      titleRef.current.focus();
+    }
+  }, [task]);
+
   task.sort((a, b) => {
     if (a.title === "" && b.title !== "") return 1;
     else if (a.title !== "" && b.title === "") return -1;
-    else if (a.status === "unfinished" && b.status === "finished") return -1;
-    else if (a.status === "finished" && b.status === "unfinished") return 1;
-    else if (a.status === "finished" && b.status === "finished")
+    else if (!a.completed && b.completed) return -1;
+    else if (a.completed && !b.completed) return 1;
+    else if (a.completed && b.completed)
       return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
     return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
   });
@@ -98,7 +149,7 @@ const ToDo = () => {
       title: "",
       dueDate: "",
       description: "",
-      status: "unfinished",
+      completed: false,
     };
     setTask((prevList) => [...prevList, newTask]);
     setTaskId(newTask.id);
@@ -129,7 +180,6 @@ const ToDo = () => {
         item.id === id ? { ...item, description: desc } : item,
       ),
     );
-    console.log("yahaha");
     setEditing(null);
   };
 
@@ -139,7 +189,7 @@ const ToDo = () => {
         item.id === id
           ? {
               ...item,
-              status: item.status === "finished" ? "unfinished" : "finished",
+              completed: item.completed ? false : true,
             }
           : item,
       ),
@@ -157,9 +207,17 @@ const ToDo = () => {
               <SelectTrigger className="ml-[10%]">
                 <SelectValue placeholder="My Tasks" />
               </SelectTrigger>
-              <SelectContent className="-translate-x-1/4" sideOffset={4}>
-                <SelectItem value="1">Personal Errands</SelectItem>
-                <SelectItem className="border-none" value="2">
+              <SelectContent
+                className="-translate-x-1/4 [&_*]:cursor-pointer"
+                sideOffset={4}
+              >
+                <SelectItem className="hover:bg-primary-gray-100/60" value="1">
+                  Personal Errands
+                </SelectItem>
+                <SelectItem
+                  className="border-none hover:bg-primary-gray-100/60"
+                  value="2"
+                >
                   Urgent To-Do
                 </SelectItem>
               </SelectContent>
@@ -179,10 +237,10 @@ const ToDo = () => {
               {task.map((item) => (
                 <AccordionItem key={item.id} value={item.id}>
                   <AccordionTrigger asChild>
-                    <div>
+                    <div className="hover:bg-primary-gray-100/60">
                       <div className="flex max-w-[60%] items-center gap-3">
                         <Checkbox
-                          checked={item.status === "finished"}
+                          checked={item.completed}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleStatusToggle(item.id);
@@ -193,6 +251,7 @@ const ToDo = () => {
                             type="text"
                             className="rounded border border-primary-gray-200 px-3 py-2 font-bold"
                             value={title}
+                            ref={titleRef}
                             placeholder="Type Task Title"
                             onChange={(e) => setTitle(e.target.value)}
                             onBlur={() => handleTitleChange(item.id)}
@@ -200,7 +259,7 @@ const ToDo = () => {
                         ) : (
                           <label
                             className={`ml-2 line-clamp-2 font-bold text-primary-gray-300 ${
-                              item.status === "finished"
+                              item.completed
                                 ? "line-through"
                                 : "line-through-none"
                             }`}
@@ -210,13 +269,12 @@ const ToDo = () => {
                         )}
                       </div>
                       <div className="flex h-fit min-w-fit items-center gap-3">
-                        {item.status === "unfinished" &&
-                          countDaysLeft(item.dueDate) < 3 && (
-                            <p className="text-indicator-red">
-                              {countDaysLeft(item.dueDate)} Days left
-                            </p>
-                          )}
-                        {item.dueDate}
+                        {!item.completed && countDaysLeft(item.dueDate) < 3 && (
+                          <p className="text-indicator-red">
+                            {countDaysLeft(item.dueDate)} Days left
+                          </p>
+                        )}
+                        {new Date(item.dueDate).toLocaleDateString("id-ID")}
                         <ChevronDown className="chevron-down h-4 w-4 shrink-0 transition-transform duration-200" />
                         <div
                           className="flex"
@@ -230,7 +288,7 @@ const ToDo = () => {
                               side="bottom"
                               sideOffset={10}
                               align="end"
-                              className="px-3 py-2"
+                              className="cursor-pointer px-3 py-2 hover:bg-primary-gray-100/60"
                               onClick={() => handleDelete(item.id)}
                             >
                               Delete
@@ -246,22 +304,20 @@ const ToDo = () => {
                         <ClockIcon
                           className={`h-4 w-4 ${item.dueDate === "" && "fill-primary-gray-300"}`}
                         />
-                        <div className="date-input-container relative inline-flex w-2 bg-red-300">
-                          <input
-                            type="date"
-                            value={item.dueDate}
-                            min={new Date().toISOString().split("T")[0]}
-                            placeholder="Set Date"
-                            className="date-input rounded border border-primary-gray-200 px-3 py-2"
-                            onChange={(e) =>
-                              handleDateChange(item.id, e.target.value)
-                            }
-                          />
-                        </div>
+                        <input
+                          type="date"
+                          value={item.dueDate}
+                          min={new Date().toISOString().split("T")[0]}
+                          placeholder="Set Date"
+                          className="date-input rounded border border-primary-gray-200 px-3 py-2"
+                          onChange={(e) =>
+                            handleDateChange(item.id, e.target.value)
+                          }
+                        />
                       </div>
                       <div className="flex gap-3">
                         <PencilIcon
-                          className={`h-4 w-4 min-w-fit ${editing && item.description === "" && "fill-primary-gray-300"}`}
+                          className={`h-4 w-4 min-w-fit ${item.title === "" && item.description === "" && "fill-primary-gray-300"}`}
                           onClick={() => {
                             setEditing(item.id);
                             setDesc(item.description);

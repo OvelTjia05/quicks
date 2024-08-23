@@ -183,10 +183,35 @@ const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
     });
   };
 
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const newMessageElement = document.querySelector(".new-message");
+        if (entry.isIntersecting) {
+          if (newMessageElement instanceof HTMLElement) {
+            newMessageElement.style.display = "none";
+          }
+        } else {
+          if (newMessageElement instanceof HTMLElement) {
+            newMessageElement.style.display = "inline-flex";
+          }
+        }
+      });
+    });
+
+    const elements = document.querySelectorAll(".unread-message");
+    elements.forEach((element) => {
+      observer.observe(element);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [chatData.messages]);
+
   const autoExpandTextareaHeight = () => {
     if (inputRef.current) {
       inputRef.current.style.height = "auto";
-      console.log("yaho");
       inputRef.current.style.height = inputRef.current.scrollHeight + "px";
     }
   };
@@ -299,7 +324,10 @@ const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
           className="custom-scrollbar relative mb-[60px] mt-14 flex flex-1 flex-col gap-2 overflow-y-auto pr-1 text-primary-gray-300"
         >
           {chatData.messages.map((item, index) => (
-            <div key={item.idMessage}>
+            <div
+              key={item.idMessage}
+              className={`${item.status === "unread" ? "unread-message" : ""}`}
+            >
               <div
                 className={`max-w-[80%] ${item.idUser === MY_ID ? "ml-auto" : ""}`}
               >
@@ -386,7 +414,7 @@ const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
           ))}
         </div>
         {chatData.messages.some((item) => item.status === "unread") && (
-          <div className="absolute bottom-20 left-1/2 inline-flex -translate-x-1/2 transform">
+          <div className="new-message absolute bottom-20 left-1/2 inline-flex -translate-x-1/2 transform">
             <Badge label={"New Message"} />
           </div>
         )}
