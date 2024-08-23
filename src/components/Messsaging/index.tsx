@@ -155,6 +155,12 @@ const Messaging = () => {
               ? "1"
               : "2"
           }
+          name={(() => {
+            const item = CHATLIST.find((item) => item.id === selectedChat);
+            return item?.type === "group"
+              ? item.groupName || ""
+              : item?.name || "";
+          })()}
           onClose={() => setSelectedChat(null)}
         />
       )}

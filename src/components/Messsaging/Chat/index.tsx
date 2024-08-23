@@ -160,7 +160,11 @@ const CHATPERSON = {
 
 const MY_ID = "1";
 
-const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
+const Chat: React.FC<{ id: string; name: string; onClose: Function }> = ({
+  id,
+  name,
+  onClose,
+}) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [chatData, setChatData] = useState(
     id === CHATGROUP.id ? CHATGROUP : CHATPERSON,
@@ -183,6 +187,14 @@ const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
     });
   };
 
+  const autoExpandTextareaHeight = () => {
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+      inputRef.current.style.height = inputRef.current.scrollHeight + "px";
+    }
+  };
+
+  //for remove new message pop up when scroll to the unread message
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -209,13 +221,7 @@ const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
     };
   }, [chatData.messages]);
 
-  const autoExpandTextareaHeight = () => {
-    if (inputRef.current) {
-      inputRef.current.style.height = "auto";
-      inputRef.current.style.height = inputRef.current.scrollHeight + "px";
-    }
-  };
-
+  //for automatically put the message to textarea when  user click edit message
   useEffect(() => {
     if (editing) {
       setMessage(editing.message);
@@ -226,10 +232,12 @@ const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
     }
   }, [editing]);
 
+  //for dynamic height of textarea
   useEffect(() => {
     autoExpandTextareaHeight();
   }, [message]);
 
+  //for scroll to the bottom when new message come or first render
   useEffect(() => {
     scrollToBottom();
   }, [chatData]);
@@ -301,7 +309,7 @@ const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
         />
         <div className="flex flex-1 flex-col">
           <h5 className="line-clamp-1 text-ellipsis font-bold leading-5 text-primary-blue">
-            {id === "1" ? CHATGROUP.groupName : CHATPERSON.name}
+            {/* {id === "1" ? CHATGROUP.groupName : CHATPERSON.name} */ name}
           </h5>
           {id === "1" && (
             <small>
@@ -334,7 +342,11 @@ const Chat: React.FC<{ id: string; onClose: Function }> = ({ id, onClose }) => {
                 <p
                   className={`mb-1 text-sm font-bold ${assignColor(item.idUser).color} ${item.idUser === MY_ID && "text-end"}`}
                 >
-                  {item.idUser === MY_ID ? "You" : item.name}
+                  {item.idUser === MY_ID
+                    ? "You"
+                    : chatData.type === "group"
+                      ? item.name
+                      : name}
                 </p>
                 <div
                   className={`flex gap-x-2 ${
