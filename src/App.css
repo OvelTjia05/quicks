@@ -13,6 +13,14 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: "Hiragino Kaku Gothic StdN";
+  src: url("/src/assets/fonts/Hiragino\ Kaku\ Gothic\ StdN\ W8.otf")
+    format("opentype");
+  font-weight: 900;
+  font-style: normal;
+}
+
 /* general */
 body {
   font-family: "Lato", sans-serif;
@@ -28,6 +36,23 @@ body {
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   @apply rounded bg-border-gray-200;
+}
+
+/* cover */
+.cover-text {
+  font-family: "Hiragino Kaku Gothic StdN", "Lato";
+  animation: in 300ms ease-out forwards;
+}
+
+@keyframes in {
+  from {
+    scale: 0.5;
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
 }
 
 /* menu */

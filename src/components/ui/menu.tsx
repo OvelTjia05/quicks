@@ -15,35 +15,9 @@ const LIST = [
   },
 ];
 
-const Menu: React.FC<{ onClick: Function }> = ({ onClick }) => {
+const Menu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
-
-  // const sortedList = (() => {
-  //   if (active === null) return LIST;
-
-  //   const activeIndex = LIST.findIndex((item) => item.label === active);
-
-  //   if (activeIndex > 0) {
-  //     const updatedList = [
-  //       LIST[activeIndex],
-  //       ...LIST.slice(1, activeIndex),
-  //       LIST[0],
-  //       ...LIST.slice(activeIndex + 1),
-  //     ];
-  //     return updatedList;
-  //   }
-
-  //   return LIST;
-  // })();
-
-  // useEffect(() => {
-  //   if (active !== null) {
-  //     if (active === "Chat") {
-  //       return <Messaging />;
-  //     }
-  //   }
-  // }, [active]);
 
   const colorConvert = (base: string, color: string) => {
     switch (base) {
@@ -72,7 +46,6 @@ const Menu: React.FC<{ onClick: Function }> = ({ onClick }) => {
 
   const handleMenu = (value: string) => {
     setActive(active === value ? null : value);
-    onClick();
   };
 
   return (
